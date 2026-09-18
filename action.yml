@@ -1,0 +1,29 @@
+name: AICostFence
+description: Block AI SDK changes that can create runaway model costs.
+author: AICostFence
+branding:
+  icon: shield
+  color: green
+inputs:
+  path:
+    description: Directory to scan.
+    required: false
+    default: .
+  config:
+    description: Path to the AICostFence JSON configuration.
+    required: false
+    default: .aicostfence.json
+  comment:
+    description: Post or update a report comment on pull requests.
+    required: false
+    default: "true"
+outputs:
+  status:
+    description: pass, warn, or fail
+  estimated-monthly-cost:
+    description: Estimated monthly cost in USD across detected call sites.
+  findings:
+    description: Number of findings.
+runs:
+  using: node20
+  main: src/index.js
