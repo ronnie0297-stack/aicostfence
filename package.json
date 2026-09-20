@@ -2,6 +2,14 @@
   "name": "aicostfence",
   "version": "0.1.0",
   "description": "A deterministic GitHub cost gate for AI SDK changes.",
+  "homepage": "https://github.com/ronnie0297-stack/aicostfence#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ronnie0297-stack/aicostfence.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ronnie0297-stack/aicostfence/issues"
+  },
   "type": "module",
   "main": "src/index.js",
   "bin": {
@@ -14,11 +22,19 @@
   "engines": {
     "node": ">=20"
   },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
   "license": "MIT",
   "keywords": [
     "ai",
     "cost",
     "github-actions",
+    "llm",
+    "ai-sdk",
+    "cost-control",
     "vercel-ai-sdk",
     "finops"
   ]

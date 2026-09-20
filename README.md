@@ -1,8 +1,54 @@
 # AICostFence
 
-AICostFence is a deterministic GitHub cost gate for applications built with the Vercel AI SDK. It finds supported AI call sites, resolves current token pricing, estimates spend from explicit traffic assumptions, and flags changes that can create runaway bills.
+**Catch expensive AI code before it reaches production.**
 
-The MVP is deliberately narrow: TypeScript/JavaScript and `generateText`, `streamText`, `generateObject`, and `streamObject` calls. It never sends source code to a model.
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-AICostFence-2ea44f?logo=github)](https://github.com/marketplace/actions/aicostfence)
+[![Test](https://github.com/ronnie0297-stack/aicostfence/actions/workflows/test.yml/badge.svg)](https://github.com/ronnie0297-stack/aicostfence/actions/workflows/test.yml)
+[![Release](https://img.shields.io/github/v/release/ronnie0297-stack/aicostfence)](https://github.com/ronnie0297-stack/aicostfence/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+AICostFence is a free GitHub Action that reviews Vercel AI SDK calls on every pull request. It estimates monthly model spend from your traffic assumptions and can block unbounded agents or changes above your budget.
+
+**No account. No API key. No source code sent to a model.**
+
+## Install in 60 seconds
+
+Create `.github/workflows/ai-cost.yml`:
+
+```yaml
+name: AI cost check
+on: pull_request
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  cost-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ronnie0297-stack/aicostfence@v0.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+Copy [`.aicostfence.example.json`](.aicostfence.example.json) to `.aicostfence.json`, set your expected traffic and monthly budget, then open a pull request.
+
+## What appears in your pull request
+
+```text
+❌ AICostFence: FAIL
+
+Detected 1 AI call site. Projected monthly cost: $30.00.
+
+agent.ts:8  openai/gpt-5.4-mini  output unbounded, tool loop unbounded
+
+• Set maxOutputTokens so the worst-case request cost is explicit.
+• Tool use has no stopWhen or maxSteps guard, so an agent loop can run away.
+```
+
+See the [risky example](examples/risky-agent.ts), its [bounded replacement](examples/bounded-agent.ts), and a [complete sample report](docs/sample-report.md).
 
 ## What it catches
 
@@ -10,6 +56,10 @@ The MVP is deliberately narrow: TypeScript/JavaScript and `generateText`, `strea
 - Tool-using calls without `stopWhen` or `maxSteps`
 - Unknown or dynamic models that cannot be priced safely
 - Projected monthly spend above repository warning or failure budgets
+
+## Why use a pull-request cost gate?
+
+Provider dashboards show spend after calls happen. AICostFence checks the code before merge, when a model change, missing token ceiling, or unbounded tool loop is still cheap to fix. Its assumptions and calculations stay visible in the repository instead of hiding behind a proprietary score.
 
 ## Local usage
 
@@ -20,29 +70,15 @@ node src/index.js scan /path/to/project --json
 
 Copy `.aicostfence.example.json` to `.aicostfence.json`, then replace the traffic and budget assumptions with values that match the application.
 
-## GitHub Action
-
-```yaml
-name: AI cost gate
-on: pull_request
-
-permissions:
-  contents: read
-  pull-requests: write
-
-jobs:
-  cost-gate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: ronnie0297-stack/aicostfence@v0.1.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-```
-
 The Action writes a job summary, updates one pull-request comment, and fails when a configured budget or agent-loop guard is violated.
+
+## Supported today
+
+- JavaScript and TypeScript
+- Vercel AI SDK `generateText`, `streamText`, `generateObject`, and `streamObject`
+- Literal model identifiers and repository-owned traffic assumptions
+
+AICostFence is an early release. Treat estimates as planning signals, not invoices. Open a [feature request](https://github.com/ronnie0297-stack/aicostfence/issues/new?template=feature.yml) if your provider or SDK is not covered yet.
 
 ## Estimation model
 
@@ -62,6 +98,10 @@ Prices are loaded from Vercel AI Gateway's public model catalog when available. 
 2. Native detection for OpenAI, Anthropic, and Google SDKs.
 3. Autofix suggestions for token ceilings and AI SDK stop conditions.
 4. Hosted history, shared policies, and budget alerts for private organizations.
+
+## Help shape the product
+
+Using AICostFence in a real repository? [Tell us what happened](https://github.com/ronnie0297-stack/aicostfence/issues/new?template=adoption.yml). That short, asynchronous feedback determines which SDK and paid team features are built next.
 
 ## License
 
