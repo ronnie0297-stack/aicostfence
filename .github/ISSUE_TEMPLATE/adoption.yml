@@ -1,0 +1,31 @@
+name: Real-world result
+description: Tell us how AICostFence worked in your repository.
+title: "[Result]: "
+labels: [feedback]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for trying AICostFence. No meeting or private information is required.
+  - type: dropdown
+    id: outcome
+    attributes:
+      label: What happened?
+      options:
+        - It caught a cost risk
+        - It passed a safe change
+        - It missed something
+        - I could not finish setup
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: What would make it more useful?
+      placeholder: SDK support, report detail, team policy, setup improvement, or anything else
+    validations:
+      required: true
+  - type: input
+    id: repo
+    attributes:
+      label: Public repository (optional)
+      placeholder: https://github.com/owner/repository

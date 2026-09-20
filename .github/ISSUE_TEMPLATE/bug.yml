@@ -1,0 +1,25 @@
+name: Bug report
+description: Report an incorrect finding, missed call, or setup failure.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Include the smallest non-sensitive code example you can.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: AICostFence version
+      placeholder: v0.1.0
+    validations:
+      required: true
