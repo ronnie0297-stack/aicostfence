@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import fs from 'node:fs';
+
+const root = fileURLToPath(new URL('../', import.meta.url));
+const cli = fileURLToPath(new URL('../../src/index.js', import.meta.url));
+const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^(GITHUB_|INPUT_)/i.test(key)));
+env.AICOSTFENCE_OFFLINE = '1';
+const args = [cli, 'scan', 'after', '--baseline', 'before'];
+const json = spawnSync(process.execPath, [...args, '--json'], { cwd: root, env, encoding: 'utf8' });
+assert.equal(json.status, 0, json.stderr);
+const c = JSON.parse(json.stdout).comparison;
+assert.equal(c.complete, true);
+assert.equal(c.baselineCallSites, 1);
+assert.equal(c.currentCallSites, 1);
+assert.ok(Math.abs(c.monthlyDelta + 4.8) < 0.000001);
+const report = spawnSync(process.execPath, args, { cwd: root, env, encoding: 'utf8' });
+assert.equal(report.status, 0, report.stderr);
+console.log(report.stdout);
+console.log('Verified comparison: $30.00 before -> $25.20 after -> -$4.80/month estimated change.');
+if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, report.stdout);
