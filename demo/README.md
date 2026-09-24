@@ -28,6 +28,10 @@ Open `reports/demo.md` for the actual scanner reports. Individual JSON and Markd
 
 ## What changes?
 
+### New: compare the two estimates
+
+From `aicostfence/demo`, run `node scripts/compare.mjs` to exercise the repository's v0.2.0 comparison implementation. It verifies **$30.00 before → $25.20 after → -$4.80/month** using the same fallback prices and current configuration. This is an estimate change, not measured savings. The original `npm run demo` remains pinned to published v0.1.0 for its fail/pass example.
+
 Compare `before/agent.ts` with `after/agent.ts`. The corrected example adds:
 
 ```ts
@@ -43,7 +47,7 @@ Both examples use identical traffic assumptions: 10,000 calls/month, 1,000 assum
 
 This reproducible demo deliberately uses the release's bundled fallback prices: $0.60 per million input tokens and $2.40 per million output tokens for its example model. These are fixture values, not a statement of current provider prices.
 
-The scanner estimates $30.00 before and $25.20 after. It does not multiply by agent steps or include retries, paid tools, or growing conversation context. The $30 estimate is not a maximum for the risky example, and the difference is not measured savings or a built-in PR delta feature.
+The scanner estimates $30.00 before and $25.20 after. It does not multiply by agent steps or include retries, paid tools, or growing conversation context. The $30 estimate is not a maximum for the risky example, and the difference is not measured savings.
 
 Version 0.1.0 detects inline configuration with text matching; it does not resolve wrappers or imported defaults or validate the stopping expression's behavior. The demo proves the released scanner's fail/pass behavior, not a full application integration.
 
