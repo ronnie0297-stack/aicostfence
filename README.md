@@ -11,6 +11,8 @@ AICostFence is a free GitHub Action that reviews Vercel AI SDK calls on every pu
 
 **No account. No API key. No source code sent to a model.**
 
+**Try the [working before-and-after demo](demo/README.md):** run the published scanner on risky code, then its corrected version. [View the verified demo runs](https://github.com/ronnie0297-stack/aicostfence/actions/workflows/demo.yml).
+
 ## Install in 60 seconds
 
 Create `.github/workflows/ai-cost.yml`:
@@ -62,6 +64,24 @@ See the [risky example](examples/risky-agent.ts), its [bounded replacement](exam
 Provider dashboards show spend after calls happen. AICostFence checks the code before merge, when a model change, missing token ceiling, or unbounded tool loop is still cheap to fix. Its assumptions and calculations stay visible in the repository instead of hiding behind a proprietary score.
 
 ## Local usage
+
+Requires Node.js 20 or newer. Run from your JavaScript/TypeScript project folder:
+
+```bash
+npx --yes aicostfence@0.1.0 scan .
+npx --yes aicostfence@0.1.0 scan . --json
+```
+
+Or install a pinned development dependency:
+
+```bash
+npm install --save-dev aicostfence@0.1.0
+npx aicostfence scan .
+```
+
+The report lists detected call sites, estimates, and findings. Exit code `0` means pass or warning, `1` means a failed guard, and `2` means an execution error. No detected calls does not establish that your application's AI usage is covered. Scans use public model pricing when available but do not invoke a model.
+
+For contributors running from a source checkout:
 
 ```bash
 node src/index.js scan /path/to/project
