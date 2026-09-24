@@ -4,6 +4,7 @@ import path from "node:path";
 import { loadCatalog } from "./catalog.js";
 import { markdownReport } from "./report.js";
 import { scanDirectory } from "./scanner.js";
+import { compareDirectories } from "./compare.js";
 
 const DEFAULTS = {
   monthlyCallsPerSite: 10000,
@@ -50,11 +51,23 @@ async function postPullRequestComment(markdown) {
 async function main() {
   const isAction = Boolean(process.env.GITHUB_ACTIONS);
   const args = process.argv.slice(2);
-  const root = isAction ? (process.env.INPUT_PATH ?? ".") : (args[0] === "scan" ? args[1] ?? "." : args[0] ?? ".");
+  const positional = [];
+  let baseline = isAction ? (process.env["INPUT_BASELINE-PATH"] || null) : null;
+  for (let i = 0; i < args.length; i += 1) {
+    if (args[i] === "--json") continue;
+    if (args[i] === "--baseline") {
+      if (!args[i + 1] || args[i + 1].startsWith("--")) throw new Error("--baseline requires a directory path.");
+      baseline = args[++i];
+    } else if (args[i].startsWith("--")) throw new Error(`Unknown option: ${args[i]}`);
+    else positional.push(args[i]);
+  }
+  if (positional[0] === "scan") positional.shift();
+  if (positional.length > 1) throw new Error("Usage: aicostfence scan [path] [--baseline directory] [--json]");
+  const root = isAction ? (process.env.INPUT_PATH || ".") : (positional[0] ?? ".");
   const configPath = isAction ? (process.env.INPUT_CONFIG ?? ".aicostfence.json") : path.join(root, ".aicostfence.json");
   const config = readConfig(configPath);
   const catalog = await loadCatalog(config);
-  const result = scanDirectory(root, catalog, config);
+  const result = baseline ? compareDirectories(root, baseline, catalog, config) : scanDirectory(root, catalog, config);
   const markdown = markdownReport(result);
 
   if (process.argv.includes("--json")) console.log(JSON.stringify(result, null, 2));
@@ -64,6 +77,10 @@ async function main() {
   appendOutput("status", result.status);
   appendOutput("estimated-monthly-cost", result.estimatedMonthlyCost.toFixed(2));
   appendOutput("findings", result.findings.length);
+  if (result.comparison) {
+    appendOutput("comparison-complete", String(result.comparison.complete));
+    appendOutput("monthly-cost-delta", result.comparison.monthlyDelta === null ? "unknown" : result.comparison.monthlyDelta.toFixed(2));
+  }
   await postPullRequestComment(markdown);
   if (result.status === "fail") process.exitCode = 1;
 }

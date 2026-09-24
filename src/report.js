@@ -13,6 +13,18 @@ export function markdownReport(result) {
     "|---|---|---:|---:|---|"
   ];
 
+  if (result.comparison) {
+    const c = result.comparison;
+    const delta = c.monthlyDelta === null ? "unknown" : `${c.monthlyDelta < 0 ? "-" : c.monthlyDelta > 0 ? "+" : ""}$${Math.abs(c.monthlyDelta).toFixed(2)}`;
+    lines.splice(4, 0, "### Cost change", "",
+      "| Baseline / month | Current / month | Change / month |",
+      "|---:|---:|---:|",
+      `| ${money(c.baselineMonthlyCost)} | ${money(c.currentMonthlyCost)} | **${delta}** |`, "",
+      `Detected calls: ${c.baselineCallSites} before → ${c.currentCallSites} after. Baseline guard status: ${c.baselineStatus}.`, "",
+      c.assumptions,
+      "Unrecognized calls are outside coverage. Estimates exclude step multiplication, retries, and paid tools; reductions are not measured savings.", "");
+  }
+
   for (const site of result.callSites) {
     const controls = [site.maxOutputTokens ? `output ≤ ${site.maxOutputTokens}` : "output unbounded"];
     if (site.hasTools) controls.push(site.hasStop ? "tool loop bounded" : "tool loop unbounded");
