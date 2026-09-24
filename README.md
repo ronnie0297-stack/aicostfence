@@ -92,6 +92,50 @@ Copy `.aicostfence.example.json` to `.aicostfence.json`, then replace the traffi
 
 The Action writes a job summary, updates one pull-request comment, and fails when a configured budget or agent-loop guard is violated.
 
+## Compare a proposed change (v0.2.0)
+
+Use two separate source directories, one for the proposed code and one for its baseline:
+
+The GitHub v0.2.0 release includes this feature. npm publication of v0.2.0 is pending; until it is published, use `node src/index.js scan ./current --baseline ./baseline` from a v0.2.0 source checkout. The following npm commands apply once that version is available:
+
+```bash
+npx --yes aicostfence@0.2.0 scan ./current --baseline ./baseline
+npx --yes aicostfence@0.2.0 scan ./current --baseline ./baseline --json
+```
+
+The report shows baseline monthly cost, current monthly cost, and their signed difference. Both scans use **the current configuration and one shared pricing snapshot**. This isolates code changes; it does not compare historical traffic settings or historical prices. If either side contains an unpriced call, the total delta is `unknown`. The current code's existing budget and safety guards still determine pass/fail; baseline failures are informational.
+
+For a pull request, explicitly check out its base and head into sibling directories:
+
+```yaml
+name: AI cost comparison
+on: pull_request
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: current
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: baseline
+      - uses: ronnie0297-stack/aicostfence@v0.2.0
+        with:
+          path: current
+          config: current/.aicostfence.json
+          baseline-path: baseline
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+The action scans source files without executing application code. Fork PRs may have read-only tokens; the job summary remains available when comments cannot be written. Keep the source directories separate; overlapping directories are rejected. Estimates cover recognized inline calls only, not wrappers, retries, step multiplication, or paid tools. [Run the comparison demo](demo/README.md).
+
 ## Supported today
 
 - JavaScript and TypeScript
@@ -114,7 +158,7 @@ Prices are loaded from Vercel AI Gateway's public model catalog when available. 
 
 ## Roadmap
 
-1. Git-diff cost deltas so pull requests show the incremental spend they introduce.
+1. Finer-grained file and call-site cost deltas beyond the repository totals available in v0.2.0.
 2. Native detection for OpenAI, Anthropic, and Google SDKs.
 3. Autofix suggestions for token ceilings and AI SDK stop conditions.
 4. Hosted history, shared policies, and budget alerts for private organizations.

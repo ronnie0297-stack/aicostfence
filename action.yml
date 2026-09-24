@@ -17,7 +17,14 @@ inputs:
     description: Post or update a report comment on pull requests.
     required: false
     default: "true"
+  baseline-path:
+    description: Optional separate directory containing the baseline source checkout. Uses current config for both scans.
+    required: false
 outputs:
+  comparison-complete:
+    description: Whether all detected calls on both sides could be priced.
+  monthly-cost-delta:
+    description: Current minus baseline estimated monthly USD, or unknown when pricing is incomplete.
   status:
     description: pass, warn, or fail
   estimated-monthly-cost:
