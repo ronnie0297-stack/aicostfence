@@ -1,0 +1,8 @@
+{
+  "monthlyCallsPerSite": 10000,
+  "assumedInputTokens": 1000,
+  "assumedOutputTokens": 1000,
+  "warnMonthlyCost": 50,
+  "failMonthlyCost": 250,
+  "failOnUnboundedTools": true
+}
