@@ -1,0 +1,10 @@
+{
+  "name": "aicostfence-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A reproducible failing-then-passing demo of AICostFence 0.1.0",
+  "scripts": { "demo": "node scripts/demo.mjs", "test": "node scripts/demo.mjs" },
+  "engines": { "node": ">=20" },
+  "devDependencies": { "aicostfence": "0.1.0" }
+}
