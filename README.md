@@ -96,7 +96,7 @@ The Action writes a job summary, updates one pull-request comment, and fails whe
 
 Use two separate source directories, one for the proposed code and one for its baseline:
 
-The GitHub v0.2.0 release includes this feature. npm publication of v0.2.0 is pending; until it is published, use `node src/index.js scan ./current --baseline ./baseline` from a v0.2.0 source checkout. The following npm commands apply once that version is available:
+You can also run `node src/index.js scan ./current --baseline ./baseline` from a v0.2.0 source checkout.
 
 ```bash
 npx --yes aicostfence@0.2.0 scan ./current --baseline ./baseline
